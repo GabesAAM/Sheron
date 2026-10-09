@@ -17,6 +17,19 @@ public class GridBoxClickSelector : MonoBehaviour
         {
             selectionCamera = GetComponent<Camera>();
         }
+
+        if (playerInteraction != null)
+        {
+            playerInteraction.ApproachCancelled += ClearSelection;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (playerInteraction != null)
+        {
+            playerInteraction.ApproachCancelled -= ClearSelection;
+        }
     }
 
     private void Update()
@@ -89,5 +102,12 @@ public class GridBoxClickSelector : MonoBehaviour
         {
             selectedTarget.SetHighlighted(true);
         }
+    }
+
+    private void ClearSelection()
+    {
+        UpdateHighlight(null);
+        lastClickedTarget = null;
+        lastClickTime = -1f;
     }
 }

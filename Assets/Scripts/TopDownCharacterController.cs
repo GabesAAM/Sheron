@@ -13,11 +13,26 @@ public class TopDownCharacterController : MonoBehaviour
     private bool hasMoveDestination;
     private Vector3 moveDestination;
     private float destinationStoppingDistance;
+    private Vector3 facingDirection = Vector3.forward;
+
+    public Vector3 FacingDirection
+    {
+        get { return facingDirection; }
+    }
 
     private void Awake()
     {
         body = GetComponent<Rigidbody>();
         movementCamera = Camera.main;
+        if (movementCamera != null)
+        {
+            Vector3 directionToCamera = movementCamera.transform.position - transform.position;
+            directionToCamera.y = 0f;
+            if (directionToCamera.sqrMagnitude > 0.0001f)
+            {
+                facingDirection = directionToCamera.normalized;
+            }
+        }
     }
 
     private void Update()
@@ -81,6 +96,11 @@ public class TopDownCharacterController : MonoBehaviour
         }
 
         Vector3 targetPosition = body.position + moveDirection * moveSpeed * Time.fixedDeltaTime;
+
+        if (moveDirection.sqrMagnitude > 0.0001f)
+        {
+            facingDirection = moveDirection.normalized;
+        }
 
         if (mapCollider != null)
         {
