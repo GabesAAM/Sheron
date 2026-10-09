@@ -83,6 +83,8 @@ public class PlayerBoxInteraction : MonoBehaviour
         heldBody.angularVelocity = Vector3.zero;
         heldBody.useGravity = false;
         heldBody.isKinematic = true;
+        heldBody.collisionDetectionMode = CollisionDetectionMode.Discrete;
+        heldBody.interpolation = RigidbodyInterpolation.None;
         heldCollider.enabled = false;
         heldBody.transform.SetParent(carryAnchor, false);
         heldBody.transform.localPosition = Vector3.zero;
@@ -169,6 +171,8 @@ public class PlayerBoxInteraction : MonoBehaviour
         boxTransform.rotation = Quaternion.identity;
         heldCollider.enabled = true;
         heldBody.useGravity = true;
+        heldBody.collisionDetectionMode = CollisionDetectionMode.Discrete;
+        heldBody.interpolation = RigidbodyInterpolation.Interpolate;
         heldBody.isKinematic = false;
         heldBody.velocity = Vector3.zero;
         heldBody.angularVelocity = Vector3.zero;
