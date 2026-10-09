@@ -292,6 +292,7 @@ GameObject:
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
   - component: {fileID: 963194229}
+  - component: {fileID: 963194230}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -380,6 +381,21 @@ MonoBehaviour:
   playerInteraction: {fileID: 1700000005}
   rayDistance: 500
   doubleClickInterval: 0.35
+--- !u!114 &963194230
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8fcd9150772040b491cc98d4e953a6da, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  target: {fileID: 1700000006}
+  deadZoneRadius: 3
+  smoothTime: 0.25
 --- !u!1001 &1132444862
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -579,6 +595,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16e4650db5e6415dbfa46b1e9c748902, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!4 &1700000006 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1429818237911520655, guid: 4775834d6b9dfb145988e3b3646fc16e, type: 3}
+  m_PrefabInstance: {fileID: 1429818238401029262}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1429818238401029262
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -608,7 +629,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1429818237911520655, guid: 4775834d6b9dfb145988e3b3646fc16e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -8
       objectReference: {fileID: 0}
     - target: {fileID: 1429818237911520655, guid: 4775834d6b9dfb145988e3b3646fc16e, type: 3}
       propertyPath: m_LocalRotation.x
