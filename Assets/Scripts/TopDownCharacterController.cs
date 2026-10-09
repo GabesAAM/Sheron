@@ -10,6 +10,9 @@ public class TopDownCharacterController : MonoBehaviour
     private Rigidbody body;
     private Camera movementCamera;
     private Vector2 movementInput;
+    private bool hasMoveDestination;
+    private Vector3 moveDestination;
+    private float destinationStoppingDistance;
 
     private void Awake()
     {
@@ -29,20 +32,52 @@ public class TopDownCharacterController : MonoBehaviour
         }
     }
 
+    public void MoveTo(Vector3 position, float stoppingDistance)
+    {
+        moveDestination = position;
+        destinationStoppingDistance = Mathf.Max(0f, stoppingDistance);
+        hasMoveDestination = true;
+    }
+
+    public void CancelMoveTo()
+    {
+        hasMoveDestination = false;
+    }
+
     private void FixedUpdate()
     {
-        Vector3 moveDirection = new Vector3(movementInput.x, 0f, movementInput.y);
+        Vector3 moveDirection;
 
-        if (movementCamera != null)
+        if (hasMoveDestination)
         {
-            Vector3 cameraRight = Vector3.ProjectOnPlane(movementCamera.transform.right, Vector3.up).normalized;
-            Vector3 cameraForward = Vector3.ProjectOnPlane(movementCamera.transform.forward, Vector3.up).normalized;
-            moveDirection = cameraRight * movementInput.x + cameraForward * movementInput.y;
+            Vector3 toDestination = moveDestination - body.position;
+            toDestination.y = 0f;
+
+            if (toDestination.sqrMagnitude <= destinationStoppingDistance * destinationStoppingDistance)
+            {
+                hasMoveDestination = false;
+                moveDirection = Vector3.zero;
+            }
+            else
+            {
+                moveDirection = toDestination.normalized;
+            }
         }
-
-        if (moveDirection.sqrMagnitude > 1f)
+        else
         {
-            moveDirection.Normalize();
+            moveDirection = new Vector3(movementInput.x, 0f, movementInput.y);
+
+            if (movementCamera != null)
+            {
+                Vector3 cameraRight = Vector3.ProjectOnPlane(movementCamera.transform.right, Vector3.up).normalized;
+                Vector3 cameraForward = Vector3.ProjectOnPlane(movementCamera.transform.forward, Vector3.up).normalized;
+                moveDirection = cameraRight * movementInput.x + cameraForward * movementInput.y;
+            }
+
+            if (moveDirection.sqrMagnitude > 1f)
+            {
+                moveDirection.Normalize();
+            }
         }
 
         Vector3 targetPosition = body.position + moveDirection * moveSpeed * Time.fixedDeltaTime;
@@ -50,8 +85,10 @@ public class TopDownCharacterController : MonoBehaviour
         if (mapCollider != null)
         {
             Bounds bounds = mapCollider.bounds;
-            targetPosition.x = Mathf.Clamp(targetPosition.x, bounds.min.x + mapEdgePadding, bounds.max.x - mapEdgePadding);
-            targetPosition.z = Mathf.Clamp(targetPosition.z, bounds.min.z + mapEdgePadding, bounds.max.z - mapEdgePadding);
+            float xPadding = Mathf.Min(mapEdgePadding, Mathf.Max(0f, bounds.extents.x - 0.3f));
+            float zPadding = Mathf.Min(mapEdgePadding, Mathf.Max(0f, bounds.extents.z - 0.3f));
+            targetPosition.x = Mathf.Clamp(targetPosition.x, bounds.min.x + xPadding, bounds.max.x - xPadding);
+            targetPosition.z = Mathf.Clamp(targetPosition.z, bounds.min.z + zPadding, bounds.max.z - zPadding);
         }
 
         body.MovePosition(targetPosition);
