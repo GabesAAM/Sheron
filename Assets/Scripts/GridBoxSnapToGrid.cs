@@ -6,6 +6,8 @@ using System.Collections.Generic;
 [RequireComponent(typeof(BoxCollider))]
 public class GridBoxSnapToGrid : MonoBehaviour
 {
+    public static event System.Action<int> MatchedBoxesRemoved;
+
     private static readonly HashSet<int> BoxesResolvingMatch = new HashSet<int>();
     [SerializeField, Min(0.01f), Tooltip("Keep this equal to the Cell Size on GridMapDimensions.")]
     private float cellSize = 1f;
@@ -631,6 +633,7 @@ public class GridBoxSnapToGrid : MonoBehaviour
             yield return new WaitForSeconds(blinkInterval);
         }
 
+        int removedCount = 0;
         for (int i = 0; i < matchedBoxes.Count; i++)
         {
             GridBoxSnapToGrid matchedBox = matchedBoxes[i];
@@ -638,7 +641,13 @@ public class GridBoxSnapToGrid : MonoBehaviour
             {
                 BoxesResolvingMatch.Remove(matchedBox.gameObject.GetInstanceID());
                 Destroy(matchedBox.gameObject);
+                removedCount++;
             }
+        }
+
+        if (removedCount > 0)
+        {
+            MatchedBoxesRemoved?.Invoke(removedCount);
         }
     }
 
