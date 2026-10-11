@@ -141,4 +141,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fd5fedec68a4d0ab6185c0866d5cfaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  recolorMaterial: {fileID: 2100000, guid: 66bb02e3990e4a5d9a114511e8bce306, type: 2}
+  hoverHeight: 0.3
+  bobbingAmplitude: 0.15
+  bobbingSpeed: 2

@@ -84,12 +84,50 @@ public class GridBoxSnapToGrid : MonoBehaviour
 
         Bounds boxBounds = GetWorldBounds(boxCollider);
         float bottomOffset = boxBounds.min.y - transform.position.y;
-        snappedPosition.y = mapBounds.max.y - bottomOffset;
+        float supportSurfaceY = GetEditorSupportSurfaceHeight(
+            snappedPosition, boxBounds, boxBounds.min.y, mapBounds.max.y);
+        snappedPosition.y = supportSurfaceY - bottomOffset;
 
         if ((transform.position - snappedPosition).sqrMagnitude > 0.000001f)
         {
             transform.position = snappedPosition;
         }
+    }
+
+    private float GetEditorSupportSurfaceHeight(
+        Vector3 snappedPosition, Bounds movingBounds, float desiredBottomY, float mapSurfaceY)
+    {
+        float supportSurfaceY = mapSurfaceY;
+        if (desiredBottomY <= mapSurfaceY + 0.01f)
+        {
+            return supportSurfaceY;
+        }
+
+        BoxCollider mapCollider = mapGrid != null ? mapGrid.GetComponent<BoxCollider>() : null;
+        BoxCollider[] allBoxes = FindObjectsOfType<BoxCollider>();
+        for (int i = 0; i < allBoxes.Length; i++)
+        {
+            BoxCollider candidate = allBoxes[i];
+            if (candidate == null || !candidate.enabled || candidate == boxCollider
+                || candidate == mapCollider || candidate.GetComponent<GridBoxSnapToGrid>() == null
+                || candidate.GetComponentInParent<TopDownCharacterController>() != null)
+            {
+                continue;
+            }
+
+            Bounds candidateBounds = GetWorldBounds(candidate);
+            bool overlapsX = Mathf.Min(snappedPosition.x + movingBounds.extents.x, candidateBounds.max.x)
+                - Mathf.Max(snappedPosition.x - movingBounds.extents.x, candidateBounds.min.x) > 0.01f;
+            bool overlapsZ = Mathf.Min(snappedPosition.z + movingBounds.extents.z, candidateBounds.max.z)
+                - Mathf.Max(snappedPosition.z - movingBounds.extents.z, candidateBounds.min.z) > 0.01f;
+            bool isBelowMovingBox = candidateBounds.max.y <= desiredBottomY + 0.05f;
+            if (overlapsX && overlapsZ && isBelowMovingBox)
+            {
+                supportSurfaceY = Mathf.Max(supportSurfaceY, candidateBounds.max.y);
+            }
+        }
+
+        return supportSurfaceY;
     }
 
     private bool TryGetGridBounds(out Bounds mapBounds)

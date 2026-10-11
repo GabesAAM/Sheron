@@ -3,11 +3,19 @@ using UnityEngine;
 [RequireComponent(typeof(SphereCollider), typeof(Rigidbody))]
 public sealed class MagicSphere : MonoBehaviour
 {
-    [SerializeField] private Material recolorMaterial;
+    [SerializeField, Min(0f), Tooltip("Minimum distance between the sphere's bottom and the map surface while idle.")]
+    private float hoverHeight = 0.25f;
+    [SerializeField, Min(0f), Tooltip("Maximum bob distance above the configured hover height.")]
+    private float bobbingAmplitude = 0.08f;
+    [SerializeField, Min(0f), Tooltip("Bobbing rate in radians per second.")]
+    private float bobbingSpeed = 2f;
 
     private SphereCollider sphereCollider;
     private Rigidbody body;
     private Renderer sphereRenderer;
+    private GridMapDimensions mapGrid;
+    private BoxCollider mapCollider;
+    private float fallbackGroundSurfaceY;
     private GridBoxSnapToGrid targetBox;
     private bool isProjectile;
     private bool consumed;
@@ -22,7 +30,32 @@ public sealed class MagicSphere : MonoBehaviour
         sphereCollider = GetComponent<SphereCollider>();
         body = GetComponent<Rigidbody>();
         sphereRenderer = GetComponent<Renderer>();
+        mapGrid = FindObjectOfType<GridMapDimensions>();
+        mapCollider = mapGrid != null ? mapGrid.GetComponent<BoxCollider>() : null;
+        fallbackGroundSurfaceY = sphereCollider.bounds.min.y;
         sphereCollider.isTrigger = false;
+    }
+
+    private void Update()
+    {
+        if (!Application.isPlaying || !IsAvailable || sphereCollider == null)
+        {
+            return;
+        }
+
+        float groundSurfaceY = mapCollider != null
+            ? mapCollider.bounds.max.y
+            : fallbackGroundSurfaceY;
+        Vector3 position = transform.position;
+        float colliderCenterOffset = transform.TransformPoint(sphereCollider.center).y - position.y;
+        float worldRadius = sphereCollider.radius * Mathf.Max(
+            Mathf.Abs(transform.lossyScale.x),
+            Mathf.Abs(transform.lossyScale.y),
+            Mathf.Abs(transform.lossyScale.z));
+        float bob = Mathf.Sin(Time.time * bobbingSpeed) * bobbingAmplitude;
+        bob = Mathf.Max(-hoverHeight, bob);
+        position.y = groundSurfaceY + hoverHeight + bob + worldRadius - colliderCenterOffset;
+        transform.position = position;
     }
 
     public void CarryBy(Transform carryAnchor)
@@ -93,9 +126,7 @@ public sealed class MagicSphere : MonoBehaviour
             boxHighlight.SetHighlighted(false);
         }
 
-        Material material = recolorMaterial != null
-            ? recolorMaterial
-            : sphereRenderer != null ? sphereRenderer.sharedMaterial : null;
+        Material material = sphereRenderer != null ? sphereRenderer.sharedMaterial : null;
         if (material != null)
         {
             ClickHighlightTarget highlightTarget = box.GetComponent<ClickHighlightTarget>();
