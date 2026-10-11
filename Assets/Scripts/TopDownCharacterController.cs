@@ -8,6 +8,7 @@ public class TopDownCharacterController : MonoBehaviour
     [SerializeField] private float mapEdgePadding = 0.6f;
 
     private Rigidbody body;
+    private PlayerStats playerStats;
     private Camera movementCamera;
     private Vector2 movementInput;
     private bool hasMoveDestination;
@@ -23,6 +24,7 @@ public class TopDownCharacterController : MonoBehaviour
     private void Awake()
     {
         body = GetComponent<Rigidbody>();
+        playerStats = GetComponent<PlayerStats>();
         movementCamera = Camera.main;
         if (movementCamera != null)
         {
@@ -95,7 +97,8 @@ public class TopDownCharacterController : MonoBehaviour
             }
         }
 
-        Vector3 targetPosition = body.position + moveDirection * moveSpeed * Time.fixedDeltaTime;
+        float effectiveMoveSpeed = moveSpeed + (playerStats != null ? playerStats.MovementSpeedBonus : 0f);
+        Vector3 targetPosition = body.position + moveDirection * effectiveMoveSpeed * Time.fixedDeltaTime;
 
         if (moveDirection.sqrMagnitude > 0.0001f)
         {

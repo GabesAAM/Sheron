@@ -7,10 +7,12 @@ public class PlayerBoxInteraction : MonoBehaviour
     public event System.Action ApproachCancelled;
 
     [SerializeField] private TopDownCharacterController movement;
+    [SerializeField] private PlayerStats playerStats;
     [SerializeField] private Transform carryAnchor;
     [SerializeField] private float approachGap = 0.55f;
     [SerializeField] private float approachTimeout = 12f;
     [SerializeField] private float throwSpeed = 6f;
+    [SerializeField, Min(0f)] private float baseThrowRangeCells = 1f;
 
     private Rigidbody heldBody;
     private Collider heldCollider;
@@ -28,6 +30,11 @@ public class PlayerBoxInteraction : MonoBehaviour
         if (movement == null)
         {
             movement = GetComponent<TopDownCharacterController>();
+        }
+
+        if (playerStats == null)
+        {
+            playerStats = GetComponent<PlayerStats>();
         }
     }
 
@@ -216,7 +223,7 @@ public class PlayerBoxInteraction : MonoBehaviour
             yield break;
         }
 
-        yield return ApproachTarget(target, targetCollider);
+        yield return ApproachTargetWithinThrowRange(target, targetCollider);
         if (!approachSucceeded || target == null || heldBody == null)
         {
             yield break;
@@ -248,6 +255,85 @@ public class PlayerBoxInteraction : MonoBehaviour
 
         movement.CancelMoveTo();
         approachSucceeded = target != null && targetCollider != null && IsCloseEnough(targetCollider);
+    }
+
+    private IEnumerator ApproachTargetWithinThrowRange(ClickHighlightTarget target, Collider targetCollider)
+    {
+        approachSucceeded = false;
+        Bounds targetBounds = targetCollider.bounds;
+        Vector3 direction = targetBounds.center - transform.position;
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 0.0001f)
+        {
+            direction = Vector3.forward;
+        }
+        direction.Normalize();
+
+        float targetRadius = Mathf.Abs(direction.x) * targetBounds.extents.x
+            + Mathf.Abs(direction.z) * targetBounds.extents.z;
+        float playerRadius = GetPlayerHorizontalRadius(direction);
+        float cellSize = GetGridCellSize(target);
+        float effectiveRange = (baseThrowRangeCells + (playerStats != null ? playerStats.ThrowRangeBonus : 0f))
+            * cellSize;
+        float stoppingDistance = targetRadius + playerRadius + effectiveRange;
+        movement.MoveTo(targetBounds.center, stoppingDistance);
+
+        float elapsed = 0f;
+        while (target != null && targetCollider != null && !IsWithinThrowRange(targetCollider))
+        {
+            elapsed += Time.deltaTime;
+            if (elapsed >= approachTimeout)
+            {
+                movement.CancelMoveTo();
+                Debug.LogWarning("The player could not reach the selected box. Check for blocked paths.", target);
+                yield break;
+            }
+
+            yield return null;
+        }
+
+        movement.CancelMoveTo();
+        approachSucceeded = target != null && targetCollider != null && IsWithinThrowRange(targetCollider);
+    }
+
+    private bool IsWithinThrowRange(Collider targetCollider)
+    {
+        Bounds bounds = targetCollider.bounds;
+        Vector3 direction = bounds.center - transform.position;
+        direction.y = 0f;
+        float centerDistance = direction.magnitude;
+        if (centerDistance < 0.0001f)
+        {
+            return true;
+        }
+
+        direction /= centerDistance;
+        float targetRadius = Mathf.Abs(direction.x) * bounds.extents.x
+            + Mathf.Abs(direction.z) * bounds.extents.z;
+        float playerRadius = GetPlayerHorizontalRadius(direction);
+        float cellSize = GetGridCellSize(targetCollider.GetComponent<ClickHighlightTarget>());
+        float effectiveRange = (baseThrowRangeCells + (playerStats != null ? playerStats.ThrowRangeBonus : 0f))
+            * cellSize;
+        return centerDistance - targetRadius - playerRadius <= effectiveRange + 0.08f;
+    }
+
+    private static float GetGridCellSize(ClickHighlightTarget target)
+    {
+        GridBoxSnapToGrid grid = target != null ? target.GetComponent<GridBoxSnapToGrid>() : null;
+        return grid != null ? grid.CellSize : 1f;
+    }
+
+    private float GetPlayerHorizontalRadius(Vector3 direction)
+    {
+        Collider playerCollider = GetComponent<Collider>();
+        if (playerCollider == null)
+        {
+            return 0f;
+        }
+
+        Bounds bounds = playerCollider.bounds;
+        return Mathf.Abs(direction.x) * bounds.extents.x
+            + Mathf.Abs(direction.z) * bounds.extents.z;
     }
 
     private float GetStoppingDistance(Bounds targetBounds)
@@ -334,7 +420,8 @@ public class PlayerBoxInteraction : MonoBehaviour
         {
             float verticalDisplacement = landingPosition.y - launchPosition.y;
             float arcClearance = 0.5f + Mathf.Max(0, stackHeightInCells - 1) * 0.45f;
-            float heightToApex = Mathf.Max(0.5f, verticalDisplacement + arcClearance);
+            float heightToApex = Mathf.Max(0.5f,
+                verticalDisplacement + arcClearance);
             float verticalSpeedAtApex = Mathf.Sqrt(2f * gravityStrength * heightToApex);
             float descendingDiscriminant = Mathf.Max(
                 0f,

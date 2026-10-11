@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1429818237911520645}
   - component: {fileID: 1429818237911520642}
-  - component: {fileID: 1429818237911520643}
   m_Layer: 0
   m_Name: Character Sprite
   m_TagString: Untagged
@@ -25,13 +24,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1429818237911520644}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 0.52, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1429818237911520655}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
 --- !u!212 &1429818237911520642
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -83,19 +82,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &1429818237911520643
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1429818237911520644}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b72cd487bbd44f3b77d9f5ff11a61bd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetCamera: {fileID: 0}
 --- !u!1 &1429818237911520654
 GameObject:
   m_ObjectHideFlags: 0
@@ -109,6 +95,7 @@ GameObject:
   - component: {fileID: 1429818237911520653}
   - component: {fileID: 1429818237911520650}
   - component: {fileID: 1429818237911520651}
+  - component: {fileID: 1429818237911520680}
   m_Layer: 0
   m_Name: Player Placeholder
   m_TagString: Player
@@ -187,13 +174,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 16e4650db5e6415dbfa46b1e9c748902, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  m_Name:
+  m_EditorClassIdentifier:
   movement: {fileID: 1429818237911520650}
+  playerStats: {fileID: 1429818237911520680}
   carryAnchor: {fileID: 1429818237911520667}
   approachGap: 0.55
   approachTimeout: 12
   throwSpeed: 6
+  baseThrowRangeCells: 1
+--- !u!114 &1429818237911520680
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1429818237911520654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63a44cb4c0e84d55a1d032c203546be2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  equippedBooks: []
 --- !u!1 &1429818237911520666
 GameObject:
   m_ObjectHideFlags: 0

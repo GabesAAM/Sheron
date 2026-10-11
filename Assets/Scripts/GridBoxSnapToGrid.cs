@@ -13,6 +13,8 @@ public class GridBoxSnapToGrid : MonoBehaviour
     private float cellSize = 1f;
 
     private GridMapDimensions mapGrid;
+
+    public float CellSize { get { return Mathf.Max(0.01f, cellSize); } }
     private BoxCollider boxCollider;
     private float settledTime;
     private bool targetedThrowPending;

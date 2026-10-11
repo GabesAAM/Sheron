@@ -951,14 +951,18 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 1429818237911520643, guid: 4775834d6b9dfb145988e3b3646fc16e, type: 3}
-      propertyPath: targetCamera
-      value: 
-      objectReference: {fileID: 963194227}
     - target: {fileID: 1429818237911520650, guid: 4775834d6b9dfb145988e3b3646fc16e, type: 3}
       propertyPath: mapCollider
       value: 
       objectReference: {fileID: 1410000004}
+    - target: {fileID: 1429818237911520650, guid: 4775834d6b9dfb145988e3b3646fc16e, type: 3}
+      propertyPath: moveSpeed
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1429818237911520651, guid: 4775834d6b9dfb145988e3b3646fc16e, type: 3}
+      propertyPath: baseThrowRangeCells
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 1429818237911520654, guid: 4775834d6b9dfb145988e3b3646fc16e, type: 3}
       propertyPath: m_Name
       value: Player Placeholder
@@ -1006,6 +1010,10 @@ PrefabInstance:
     - target: {fileID: 1429818237911520655, guid: 4775834d6b9dfb145988e3b3646fc16e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1429818237911520680, guid: 4775834d6b9dfb145988e3b3646fc16e, type: 3}
+      propertyPath: equippedBooks.Array.size
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4775834d6b9dfb145988e3b3646fc16e, type: 3}
