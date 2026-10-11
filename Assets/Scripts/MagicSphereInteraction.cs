@@ -21,6 +21,11 @@ public sealed class MagicSphereInteraction : MonoBehaviour
         get { return heldSphere != null; }
     }
 
+    public Rigidbody HeldBody
+    {
+        get { return heldSphere != null ? heldSphere.GetComponent<Rigidbody>() : null; }
+    }
+
     public bool IsApproaching
     {
         get { return activeCommand != null; }
@@ -106,6 +111,15 @@ public sealed class MagicSphereInteraction : MonoBehaviour
     public void CancelForDamage()
     {
         CancelCurrentCommand();
+    }
+
+    public void CancelForOtherInteraction()
+    {
+        CancelCurrentCommand();
+        if (movement != null)
+        {
+            movement.CancelMoveTo();
+        }
     }
 
     private IEnumerator ApproachAndPickUp(MagicSphere sphere)

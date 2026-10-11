@@ -30,6 +30,11 @@ public class PlayerBoxInteraction : MonoBehaviour
         get { return heldBody != null; }
     }
 
+    public Rigidbody HeldBody
+    {
+        get { return heldBody; }
+    }
+
     private void Awake()
     {
         if (movement == null)
