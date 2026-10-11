@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
-public class SampleSceneClock : MonoBehaviour
+public class SampleSceneUI : MonoBehaviour
 {
     [SerializeField] private Vector2 screenMargin = new Vector2(28f, 28f);
     [SerializeField] private Vector2 panelSize = new Vector2(230f, 128f);
@@ -13,7 +13,9 @@ public class SampleSceneClock : MonoBehaviour
 
     private Text timerText;
     private Text boxCountText;
+    private Text healthHeartsText;
     private GameObject congratulationsOverlay;
+    private PlayerHealth playerHealth;
     private float elapsedTime;
     private int lastDisplayedSecond = -1;
     private bool timerRunning = true;
@@ -49,9 +51,23 @@ public class SampleSceneClock : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        playerHealth = FindObjectOfType<PlayerHealth>();
+        if (playerHealth != null)
+        {
+            playerHealth.HealthChanged += OnPlayerHealthChanged;
+            UpdateHealthDisplay(playerHealth.CurrentHealth, playerHealth.MaxHealth);
+        }
+    }
+
     private void OnDestroy()
     {
         GridBoxSnapToGrid.MatchedBoxesRemoved -= OnMatchedBoxesRemoved;
+        if (playerHealth != null)
+        {
+            playerHealth.HealthChanged -= OnPlayerHealthChanged;
+        }
     }
 
     private void CreateClockUi()
@@ -108,7 +124,43 @@ public class SampleSceneClock : MonoBehaviour
         timerRect.anchoredPosition = new Vector2(0f, 7f);
         timerRect.sizeDelta = new Vector2(-16f, 46f);
 
+        CreateHealthPanel(canvasObject.transform);
         CreateCongratulationsOverlay(canvasObject.transform);
+    }
+
+    private void CreateHealthPanel(Transform canvasTransform)
+    {
+        GameObject panelObject = new GameObject("Health Panel",
+            typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        panelObject.transform.SetParent(canvasTransform, false);
+        RectTransform panelRect = panelObject.GetComponent<RectTransform>();
+        panelRect.anchorMin = new Vector2(0f, 1f);
+        panelRect.anchorMax = new Vector2(0f, 1f);
+        panelRect.pivot = new Vector2(0f, 1f);
+        panelRect.anchoredPosition = new Vector2(screenMargin.x, -screenMargin.y);
+        panelRect.sizeDelta = new Vector2(190f, 78f);
+
+        Image panelImage = panelObject.GetComponent<Image>();
+        panelImage.color = new Color(0.035f, 0.055f, 0.09f, 0.88f);
+        panelImage.raycastTarget = false;
+
+        Text title = CreateLabel(panelObject.transform, "Health Title", "HEALTH", titleFontSize,
+            FontStyle.Bold, new Color(1f, 0.58f, 0.64f));
+        RectTransform titleRect = title.rectTransform;
+        titleRect.anchorMin = new Vector2(0f, 1f);
+        titleRect.anchorMax = new Vector2(1f, 1f);
+        titleRect.pivot = new Vector2(0.5f, 1f);
+        titleRect.anchoredPosition = new Vector2(0f, -5f);
+        titleRect.sizeDelta = new Vector2(-12f, 22f);
+
+        healthHeartsText = CreateLabel(panelObject.transform, "Health Hearts", string.Empty, 38,
+            FontStyle.Bold, Color.white);
+        healthHeartsText.supportRichText = true;
+        RectTransform heartsRect = healthHeartsText.rectTransform;
+        heartsRect.anchorMin = new Vector2(0f, 0f);
+        heartsRect.anchorMax = new Vector2(1f, 1f);
+        heartsRect.offsetMin = new Vector2(6f, 3f);
+        heartsRect.offsetMax = new Vector2(-6f, -24f);
     }
 
     private void CreateCongratulationsOverlay(Transform canvasTransform)
@@ -200,6 +252,28 @@ public class SampleSceneClock : MonoBehaviour
         {
             boxCountText.text = "BOXES: " + remainingBoxCount.ToString("00");
         }
+    }
+
+    private void OnPlayerHealthChanged(int currentHealth, int maximumHealth)
+    {
+        UpdateHealthDisplay(currentHealth, maximumHealth);
+    }
+
+    private void UpdateHealthDisplay(int currentHealth, int maximumHealth)
+    {
+        if (healthHeartsText == null)
+        {
+            return;
+        }
+
+        string hearts = string.Empty;
+        for (int i = 0; i < maximumHealth; i++)
+        {
+            string color = i < currentHealth ? "#F05268" : "#59616E";
+            hearts += "<color=" + color + ">♥</color> ";
+        }
+
+        healthHeartsText.text = hearts.TrimEnd();
     }
 
     private void ShowCongratulations()

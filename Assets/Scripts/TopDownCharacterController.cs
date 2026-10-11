@@ -15,6 +15,9 @@ public class TopDownCharacterController : MonoBehaviour
     private Vector3 moveDestination;
     private float destinationStoppingDistance;
     private Vector3 facingDirection = Vector3.forward;
+    private Vector3 knockbackDirection;
+    private float knockbackSpeed;
+    private float knockbackTimeRemaining;
 
     public Vector3 FacingDirection
     {
@@ -61,11 +64,30 @@ public class TopDownCharacterController : MonoBehaviour
         hasMoveDestination = false;
     }
 
+    public void ApplyKnockback(Vector3 direction, float distance, float duration)
+    {
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 0.0001f || distance <= 0f || duration <= 0f)
+        {
+            return;
+        }
+
+        CancelMoveTo();
+        knockbackDirection = direction.normalized;
+        knockbackSpeed = distance / duration;
+        knockbackTimeRemaining = duration;
+    }
+
     private void FixedUpdate()
     {
         Vector3 moveDirection;
+        bool isKnockingBack = knockbackTimeRemaining > 0f;
 
-        if (hasMoveDestination)
+        if (isKnockingBack)
+        {
+            moveDirection = knockbackDirection;
+        }
+        else if (hasMoveDestination)
         {
             Vector3 toDestination = moveDestination - body.position;
             toDestination.y = 0f;
@@ -97,10 +119,15 @@ public class TopDownCharacterController : MonoBehaviour
             }
         }
 
-        float effectiveMoveSpeed = moveSpeed + (playerStats != null ? playerStats.MovementSpeedBonus : 0f);
-        Vector3 targetPosition = body.position + moveDirection * effectiveMoveSpeed * Time.fixedDeltaTime;
+        float effectiveMoveSpeed = isKnockingBack
+            ? knockbackSpeed
+            : moveSpeed + (playerStats != null ? playerStats.MovementSpeedBonus : 0f);
+        float movementStepTime = isKnockingBack
+            ? Mathf.Min(Time.fixedDeltaTime, knockbackTimeRemaining)
+            : Time.fixedDeltaTime;
+        Vector3 targetPosition = body.position + moveDirection * effectiveMoveSpeed * movementStepTime;
 
-        if (moveDirection.sqrMagnitude > 0.0001f)
+        if (!isKnockingBack && moveDirection.sqrMagnitude > 0.0001f)
         {
             facingDirection = moveDirection.normalized;
         }
@@ -115,5 +142,10 @@ public class TopDownCharacterController : MonoBehaviour
         }
 
         body.MovePosition(targetPosition);
+
+        if (isKnockingBack)
+        {
+            knockbackTimeRemaining = Mathf.Max(0f, knockbackTimeRemaining - Time.fixedDeltaTime);
+        }
     }
 }

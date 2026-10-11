@@ -96,6 +96,7 @@ GameObject:
   - component: {fileID: 1429818237911520650}
   - component: {fileID: 1429818237911520651}
   - component: {fileID: 1429818237911520680}
+  - component: {fileID: 1429818237911520681}
   m_Layer: 0
   m_Name: Player Placeholder
   m_TagString: Player
@@ -196,6 +197,24 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier:
   equippedBooks: []
+--- !u!114 &1429818237911520681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1429818237911520654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d87eec3472d46fba4da33eb2dd9f311, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  maxHealth: 3
+  invulnerabilityDuration: 0.9
+  knockbackDistance: 0.45
+  knockbackDuration: 0.15
+  blinkCount: 3
+  blinkHalfPeriod: 0.12
 --- !u!1 &1429818237911520666
 GameObject:
   m_ObjectHideFlags: 0

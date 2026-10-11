@@ -241,22 +241,37 @@ public class GridBoxSnapToGrid : MonoBehaviour
         float supportSurfaceY,
         out Vector3 placementPosition)
     {
-        placementPosition = desiredPosition;
-        if (movingBox == null)
-        {
-            return false;
-        }
-
         if (mapGrid == null)
         {
             FindMapGrid();
         }
 
-        if (!TryGetGridBounds(out Bounds mapBounds))
+        return TryGetGridAlignedPosition(
+            mapGrid, movingBox, CellSize, desiredPosition, supportSurfaceY, out placementPosition);
+    }
+
+    public static bool TryGetGridAlignedPosition(
+        GridMapDimensions grid,
+        BoxCollider movingBox,
+        float cellSize,
+        Vector3 desiredPosition,
+        float supportSurfaceY,
+        out Vector3 placementPosition)
+    {
+        placementPosition = desiredPosition;
+        if (grid == null || movingBox == null)
         {
             return false;
         }
 
+        BoxCollider mapCollider = grid.GetComponent<BoxCollider>();
+        if (mapCollider == null)
+        {
+            return false;
+        }
+
+        cellSize = Mathf.Max(0.01f, cellSize);
+        Bounds mapBounds = mapCollider.bounds;
         Bounds movingBounds = GetWorldBounds(movingBox);
         int mapCellsX = Mathf.Max(1, Mathf.RoundToInt(mapBounds.size.x / cellSize));
         int mapCellsZ = Mathf.Max(1, Mathf.RoundToInt(mapBounds.size.z / cellSize));

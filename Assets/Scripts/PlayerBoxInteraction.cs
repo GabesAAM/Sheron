@@ -78,6 +78,11 @@ public class PlayerBoxInteraction : MonoBehaviour
         }
     }
 
+    public void CancelForDamage()
+    {
+        CancelCurrentCommand();
+    }
+
     public void PickUp(ClickHighlightTarget target)
     {
         if (target == null || heldBody != null || carryAnchor == null || movement == null)
