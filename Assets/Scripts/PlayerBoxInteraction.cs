@@ -191,7 +191,15 @@ public class PlayerBoxInteraction : MonoBehaviour
             yield break;
         }
 
-        yield return ApproachTarget(target, targetCollider);
+        float pickupRangeCells = playerStats != null ? playerStats.PickupRangeBonusCells : 0f;
+        if (pickupRangeCells > 0f)
+        {
+            yield return ApproachTargetWithinRange(target, targetCollider, pickupRangeCells);
+        }
+        else
+        {
+            yield return ApproachTarget(target, targetCollider);
+        }
         if (!approachSucceeded || target == null)
         {
             yield break;
@@ -257,7 +265,8 @@ public class PlayerBoxInteraction : MonoBehaviour
         approachSucceeded = target != null && targetCollider != null && IsCloseEnough(targetCollider);
     }
 
-    private IEnumerator ApproachTargetWithinThrowRange(ClickHighlightTarget target, Collider targetCollider)
+    private IEnumerator ApproachTargetWithinRange(
+        ClickHighlightTarget target, Collider targetCollider, float rangeCells)
     {
         approachSucceeded = false;
         Bounds targetBounds = targetCollider.bounds;
@@ -273,13 +282,12 @@ public class PlayerBoxInteraction : MonoBehaviour
             + Mathf.Abs(direction.z) * targetBounds.extents.z;
         float playerRadius = GetPlayerHorizontalRadius(direction);
         float cellSize = GetGridCellSize(target);
-        float effectiveRange = (baseThrowRangeCells + (playerStats != null ? playerStats.ThrowRangeBonus : 0f))
-            * cellSize;
+        float effectiveRange = rangeCells * cellSize;
         float stoppingDistance = targetRadius + playerRadius + effectiveRange;
         movement.MoveTo(targetBounds.center, stoppingDistance);
 
         float elapsed = 0f;
-        while (target != null && targetCollider != null && !IsWithinThrowRange(targetCollider))
+        while (target != null && targetCollider != null && !IsWithinRange(targetCollider, rangeCells))
         {
             elapsed += Time.deltaTime;
             if (elapsed >= approachTimeout)
@@ -293,10 +301,18 @@ public class PlayerBoxInteraction : MonoBehaviour
         }
 
         movement.CancelMoveTo();
-        approachSucceeded = target != null && targetCollider != null && IsWithinThrowRange(targetCollider);
+        approachSucceeded = target != null && targetCollider != null
+            && IsWithinRange(targetCollider, rangeCells);
     }
 
-    private bool IsWithinThrowRange(Collider targetCollider)
+    private IEnumerator ApproachTargetWithinThrowRange(ClickHighlightTarget target, Collider targetCollider)
+    {
+        float throwRangeCells = baseThrowRangeCells
+            + (playerStats != null ? playerStats.ThrowRangeBonus : 0f);
+        yield return ApproachTargetWithinRange(target, targetCollider, throwRangeCells);
+    }
+
+    private bool IsWithinRange(Collider targetCollider, float rangeCells)
     {
         Bounds bounds = targetCollider.bounds;
         Vector3 direction = bounds.center - transform.position;
@@ -312,8 +328,7 @@ public class PlayerBoxInteraction : MonoBehaviour
             + Mathf.Abs(direction.z) * bounds.extents.z;
         float playerRadius = GetPlayerHorizontalRadius(direction);
         float cellSize = GetGridCellSize(targetCollider.GetComponent<ClickHighlightTarget>());
-        float effectiveRange = (baseThrowRangeCells + (playerStats != null ? playerStats.ThrowRangeBonus : 0f))
-            * cellSize;
+        float effectiveRange = rangeCells * cellSize;
         return centerDistance - targetRadius - playerRadius <= effectiveRange + 0.08f;
     }
 

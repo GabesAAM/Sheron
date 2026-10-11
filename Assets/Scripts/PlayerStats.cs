@@ -7,6 +7,7 @@ public class PlayerStats : MonoBehaviour
 
     public float MovementSpeedBonus { get; private set; }
     public float ThrowRangeBonus { get; private set; }
+    public float PickupRangeBonusCells { get; private set; }
     public IReadOnlyList<BookDefinition> EquippedBooks { get { return equippedBooks; } }
 
     private void Awake()
@@ -51,6 +52,7 @@ public class PlayerStats : MonoBehaviour
 
         float movementBonus = 0f;
         float throwBonus = 0f;
+        float pickupRangeBonus = 0f;
         for (int i = 0; i < equippedBooks.Count; i++)
         {
             BookDefinition book = equippedBooks[i];
@@ -61,9 +63,11 @@ public class PlayerStats : MonoBehaviour
 
             movementBonus += book.MovementSpeedBonus;
             throwBonus += book.ThrowRangeBonus;
+            pickupRangeBonus += book.PickupRangeBonusCells;
         }
 
         MovementSpeedBonus = movementBonus;
         ThrowRangeBonus = throwBonus;
+        PickupRangeBonusCells = pickupRangeBonus;
     }
 }
