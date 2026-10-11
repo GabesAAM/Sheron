@@ -4,6 +4,7 @@ public class GridBoxClickSelector : MonoBehaviour
 {
     [SerializeField] private Camera selectionCamera;
     [SerializeField] private PlayerBoxInteraction playerInteraction;
+    private MagicSphereInteraction magicSphereInteraction;
     [SerializeField] private float rayDistance = 500f;
     [SerializeField] private float doubleClickInterval = 0.35f;
 
@@ -21,6 +22,12 @@ public class GridBoxClickSelector : MonoBehaviour
         if (playerInteraction != null)
         {
             playerInteraction.ApproachCancelled += ClearSelection;
+            magicSphereInteraction = playerInteraction.GetComponent<MagicSphereInteraction>();
+        }
+
+        if (magicSphereInteraction != null)
+        {
+            magicSphereInteraction.ApproachCancelled += ClearSelection;
         }
     }
 
@@ -29,6 +36,11 @@ public class GridBoxClickSelector : MonoBehaviour
         if (playerInteraction != null)
         {
             playerInteraction.ApproachCancelled -= ClearSelection;
+        }
+
+        if (magicSphereInteraction != null)
+        {
+            magicSphereInteraction.ApproachCancelled -= ClearSelection;
         }
     }
 
@@ -50,6 +62,17 @@ public class GridBoxClickSelector : MonoBehaviour
 
         UpdateHighlight(clickedTarget);
 
+        if (magicSphereInteraction != null && magicSphereInteraction.IsHoldingSphere)
+        {
+            if (clickedTarget != null && clickedTarget.GetComponent<GridBoxSnapToGrid>() != null)
+            {
+                magicSphereInteraction.ThrowAt(clickedTarget);
+            }
+
+            ResetClickSequence();
+            return;
+        }
+
         if (playerInteraction == null)
         {
             return;
@@ -57,13 +80,19 @@ public class GridBoxClickSelector : MonoBehaviour
 
         if (playerInteraction.HeldTarget != null)
         {
-            if (clickedTarget != null && clickedTarget != playerInteraction.HeldTarget)
+            if (clickedTarget != null && clickedTarget != playerInteraction.HeldTarget
+                && clickedTarget.GetComponent<GridBoxSnapToGrid>() != null)
             {
                 playerInteraction.ThrowHeldOn(clickedTarget);
             }
 
-            lastClickedTarget = null;
-            lastClickTime = -1f;
+            ResetClickSequence();
+            return;
+        }
+
+        if (magicSphereInteraction != null && magicSphereInteraction.IsApproaching)
+        {
+            ResetClickSequence();
             return;
         }
 
@@ -75,7 +104,15 @@ public class GridBoxClickSelector : MonoBehaviour
         {
             lastClickedTarget = null;
             lastClickTime = -1f;
-            playerInteraction.PickUp(clickedTarget);
+            MagicSphere sphere = clickedTarget.GetComponentInParent<MagicSphere>();
+            if (sphere != null && magicSphereInteraction != null)
+            {
+                magicSphereInteraction.PickUp(sphere);
+            }
+            else if (clickedTarget.GetComponent<GridBoxSnapToGrid>() != null)
+            {
+                playerInteraction.PickUp(clickedTarget);
+            }
         }
         else
         {
@@ -88,6 +125,11 @@ public class GridBoxClickSelector : MonoBehaviour
     {
         if (target == selectedTarget)
         {
+            if (target != null && !target.IsHighlighted)
+            {
+                target.SetHighlighted(true);
+            }
+
             return;
         }
 
@@ -107,6 +149,12 @@ public class GridBoxClickSelector : MonoBehaviour
     private void ClearSelection()
     {
         UpdateHighlight(null);
+        lastClickedTarget = null;
+        lastClickTime = -1f;
+    }
+
+    private void ResetClickSequence()
+    {
         lastClickedTarget = null;
         lastClickTime = -1f;
     }

@@ -112,6 +112,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   highlightColor: {r: 1, g: 0.9, b: 0.25, a: 1}
   highlightStrength: 0.65
+  maxHighlightDuration: 1
 --- !u!54 &2755580979582753452
 Rigidbody:
   m_ObjectHideFlags: 0

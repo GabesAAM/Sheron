@@ -13,6 +13,7 @@ public sealed class PlayerHealth : MonoBehaviour
 
     private TopDownCharacterController movement;
     private PlayerBoxInteraction boxInteraction;
+    private MagicSphereInteraction magicSphereInteraction;
     private SpriteRenderer[] spriteRenderers;
     private bool[] originalSpriteStates;
     private int currentHealth;
@@ -30,6 +31,7 @@ public sealed class PlayerHealth : MonoBehaviour
         currentHealth = maxHealth;
         movement = GetComponent<TopDownCharacterController>();
         boxInteraction = GetComponent<PlayerBoxInteraction>();
+        magicSphereInteraction = GetComponent<MagicSphereInteraction>();
         spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
         originalSpriteStates = new bool[spriteRenderers.Length];
         for (int i = 0; i < spriteRenderers.Length; i++)
@@ -51,6 +53,11 @@ public sealed class PlayerHealth : MonoBehaviour
         if (boxInteraction != null)
         {
             boxInteraction.CancelForDamage();
+        }
+
+        if (magicSphereInteraction != null)
+        {
+            magicSphereInteraction.CancelForDamage();
         }
 
         if (movement != null)

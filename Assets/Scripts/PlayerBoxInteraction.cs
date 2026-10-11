@@ -25,6 +25,11 @@ public class PlayerBoxInteraction : MonoBehaviour
         get { return heldTarget; }
     }
 
+    public bool IsHoldingObject
+    {
+        get { return heldBody != null; }
+    }
+
     private void Awake()
     {
         if (movement == null)
@@ -79,6 +84,11 @@ public class PlayerBoxInteraction : MonoBehaviour
     }
 
     public void CancelForDamage()
+    {
+        CancelCurrentCommand();
+    }
+
+    public void CancelForOtherInteraction()
     {
         CancelCurrentCommand();
     }
@@ -211,6 +221,7 @@ public class PlayerBoxInteraction : MonoBehaviour
         }
 
         Rigidbody boxBody = target.GetComponent<Rigidbody>();
+        target.SetHighlighted(false);
         heldTarget = target;
         heldBody = boxBody;
         heldCollider = targetCollider;
