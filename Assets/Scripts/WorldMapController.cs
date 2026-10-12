@@ -10,6 +10,10 @@ public class WorldMapController : MonoBehaviour
     [SerializeField] private WorldMapStageNode[] stages;
     [SerializeField] private LineRenderer stagePath;
     [SerializeField, Min(0.1f)] private float travelSpeed = 4f;
+    [SerializeField, Min(0f), Tooltip("How far above each stage node the route line is drawn.")]
+    private float pathHeightOffset = 0.05f;
+
+    public float PathHeightOffset { get { return pathHeightOffset; } }
 
     private Button startButton;
     private GameObject stageOptionsPanel;
@@ -91,7 +95,7 @@ public class WorldMapController : MonoBehaviour
 
         if (playerToken != null)
         {
-            playerToken.rotation = Quaternion.LookRotation(mapCamera.transform.position - playerToken.position, Vector3.up);
+            playerToken.rotation = Quaternion.Euler(0f, -180f, 0f);
         }
 
         if (stages != null)
@@ -189,7 +193,7 @@ public class WorldMapController : MonoBehaviour
         for (int i = 0; i < stages.Length; i++)
         {
             stagePath.SetPosition(i, stagePath.transform.InverseTransformPoint(
-                stages[i].transform.position + Vector3.up * 0.18f));
+                stages[i].transform.position + Vector3.up * pathHeightOffset));
         }
     }
 

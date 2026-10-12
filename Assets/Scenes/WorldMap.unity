@@ -863,6 +863,7 @@ MonoBehaviour:
   - {fileID: 1575711206}
   stagePath: {fileID: 1975212412}
   travelSpeed: 10
+  pathHeightOffset: 0.05
 --- !u!1 &852791126
 GameObject:
   m_ObjectHideFlags: 0
@@ -2158,7 +2159,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
       propertyPath: m_Positions.Array.data[0].y
-      value: 0.28
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
       propertyPath: m_Positions.Array.data[0].z
@@ -2166,19 +2167,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
       propertyPath: m_Positions.Array.data[1].x
-      value: -5.244672
+      value: -5
       objectReference: {fileID: 0}
     - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
       propertyPath: m_Positions.Array.data[1].y
-      value: 0.28
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
       propertyPath: m_Positions.Array.data[1].z
-      value: -1.354372
+      value: -1.7
       objectReference: {fileID: 0}
     - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
       propertyPath: m_Positions.Array.data[2].y
-      value: 0.28
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
       propertyPath: m_Positions.Array.data[2].z
@@ -2190,7 +2191,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
       propertyPath: m_Positions.Array.data[3].y
-      value: 0.28
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
       propertyPath: m_Positions.Array.data[3].z
@@ -2202,11 +2203,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
       propertyPath: m_Positions.Array.data[4].y
-      value: 0.28
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
       propertyPath: m_Positions.Array.data[4].z
       value: -5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
+      propertyPath: m_Parameters.textureMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
+      propertyPath: m_UseWorldSpace
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
+      propertyPath: m_Parameters.alignment
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1091228543271450787, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
+      propertyPath: m_Parameters.shadowBias
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1638112546560951535, guid: 1a10c05d0f098274da45d11b7792fbb6, type: 3}
       propertyPath: m_Name

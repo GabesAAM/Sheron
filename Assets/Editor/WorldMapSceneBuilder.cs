@@ -187,7 +187,8 @@ internal static class WorldMapSceneBuilder
         route.useWorldSpace = false;
         for (int i = 0; i < stageNodes.Length; i++)
         {
-            route.SetPosition(i, stageNodes[i].transform.localPosition + Vector3.up * 0.18f);
+            route.SetPosition(i, stageNodes[i].transform.localPosition
+                + Vector3.up * controller.PathHeightOffset);
         }
         PrefabUtility.RecordPrefabInstancePropertyModifications(route);
 
