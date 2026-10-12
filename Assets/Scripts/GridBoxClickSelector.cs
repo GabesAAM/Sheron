@@ -46,7 +46,7 @@ public class GridBoxClickSelector : MonoBehaviour
 
     private void Update()
     {
-        if (selectionCamera == null || !Input.GetMouseButtonDown(0))
+        if (PauseMenuController.IsPaused || selectionCamera == null || !Input.GetMouseButtonDown(0))
         {
             return;
         }

@@ -46,6 +46,11 @@ public sealed class MagicSphereInteraction : MonoBehaviour
 
     private void Update()
     {
+        if (PauseMenuController.IsPaused)
+        {
+            return;
+        }
+
         bool spacePressed = Input.GetKeyDown(KeyCode.Space);
         bool movementKeyPressed = Input.GetKeyDown(KeyCode.W)
             || Input.GetKeyDown(KeyCode.A)

@@ -8,35 +8,35 @@ public sealed class HurtfulObject : MonoBehaviour
 
     private BoxCollider trapCollider;
     private GridMapDimensions mapGrid;
+    private bool snapPending = true;
 
     private void OnEnable()
     {
-        CacheReferences();
-        if (trapCollider != null)
-        {
-            trapCollider.isTrigger = false;
-        }
-        SnapToGrid();
+        snapPending = true;
     }
 
     private void OnValidate()
     {
+        // OnValidate may run during scene restoration. Defer all scene/component
+        // access and collider-bound queries until Update has a stable scene.
         cellSize = Mathf.Max(0.01f, cellSize);
+    }
+
+    private void Update()
+    {
+        if (Application.isPlaying && !snapPending)
+        {
+            return;
+        }
+
         CacheReferences();
         if (trapCollider != null)
         {
             trapCollider.isTrigger = false;
         }
-        SnapToGrid();
-    }
 
-    private void Update()
-    {
-        if (!Application.isPlaying)
-        {
-            CacheReferences();
-            SnapToGrid();
-        }
+        SnapToGrid();
+        snapPending = false;
     }
 
     private void OnCollisionEnter(Collision collision)

@@ -433,6 +433,10 @@ PrefabInstance:
       propertyPath: displayName
       value: Mushroom Woods
       objectReference: {fileID: 0}
+    - target: {fileID: 7004763836780984062, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
+      propertyPath: sceneAsset
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 7200291940679877330, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
       propertyPath: m_Name
       value: Stage 2 - Mushroom Woods
@@ -1006,6 +1010,10 @@ PrefabInstance:
     - target: {fileID: 7004763836780984062, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
       propertyPath: displayName
       value: Crystal Cave
+      objectReference: {fileID: 0}
+    - target: {fileID: 7004763836780984062, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
+      propertyPath: sceneAsset
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7200291940679877330, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
       propertyPath: m_Name
@@ -1582,6 +1590,10 @@ PrefabInstance:
       propertyPath: displayName
       value: Sky Bridge
       objectReference: {fileID: 0}
+    - target: {fileID: 7004763836780984062, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
+      propertyPath: sceneAsset
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 7200291940679877330, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
       propertyPath: m_Name
       value: Stage 3 - Sky Bridge
@@ -1751,6 +1763,10 @@ PrefabInstance:
     - target: {fileID: 7004763836780984062, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
       propertyPath: displayName
       value: Final Castle
+      objectReference: {fileID: 0}
+    - target: {fileID: 7004763836780984062, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
+      propertyPath: sceneAsset
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 7200291940679877330, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
       propertyPath: m_Name

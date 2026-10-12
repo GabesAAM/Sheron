@@ -33,38 +33,31 @@ public class GridBoxSnapToGrid : MonoBehaviour
     {
         boxCollider = GetComponent<BoxCollider>();
         FindMapGrid();
-        if (Application.isPlaying)
-        {
-            return;
-        }
-
-        SnapToGrid();
     }
 
     private void OnValidate()
     {
+        // OnValidate can run while Unity is restoring a scene or prefab. Keep it
+        // limited to serialized data; collider bounds are not safe to query here.
         cellSize = Mathf.Max(0.01f, cellSize);
-        boxCollider = GetComponent<BoxCollider>();
-        FindMapGrid();
-        SnapToGrid();
     }
 
     private void Update()
     {
-        if (Application.isPlaying)
+        if (boxCollider == null)
         {
-            if (mapGrid == null)
-            {
-                FindMapGrid();
-            }
-
-            SnapThrownBoxAfterLanding();
-            return;
+            boxCollider = GetComponent<BoxCollider>();
         }
 
         if (mapGrid == null)
         {
             FindMapGrid();
+        }
+
+        if (Application.isPlaying)
+        {
+            SnapThrownBoxAfterLanding();
+            return;
         }
 
         SnapToGrid();
