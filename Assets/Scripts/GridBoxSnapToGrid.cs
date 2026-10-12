@@ -11,10 +11,19 @@ public class GridBoxSnapToGrid : MonoBehaviour
     private static readonly HashSet<int> BoxesResolvingMatch = new HashSet<int>();
     [SerializeField, Min(0.01f), Tooltip("Keep this equal to the Cell Size on GridMapDimensions.")]
     private float cellSize = 1f;
+    [SerializeField, Tooltip("When enabled, this box can be picked up and moved by the player.")]
+    private bool canBePickedUp = true;
+    [SerializeField, Tooltip("When enabled, other boxes can be stacked on top of this box.")]
+    private bool canBeStackedOn = true;
+    [SerializeField, Tooltip("When enabled, this box can be removed by matching a stack of three or more.")]
+    private bool participatesInMatchMechanic = true;
 
     private GridMapDimensions mapGrid;
 
     public float CellSize { get { return Mathf.Max(0.01f, cellSize); } }
+    public bool CanBePickedUp { get { return canBePickedUp; } }
+    public bool CanBeStackedOn { get { return canBeStackedOn; } }
+    public bool ParticipatesInMatchMechanic { get { return participatesInMatchMechanic; } }
     private BoxCollider boxCollider;
     private float settledTime;
     private bool targetedThrowPending;
@@ -83,9 +92,22 @@ public class GridBoxSnapToGrid : MonoBehaviour
         }
 
         Bounds boxBounds = GetWorldBounds(boxCollider);
+        BoxCollider[] allBoxes = FindObjectsOfType<BoxCollider>();
+        if (OverlapsNonStackableBox(snappedPosition, boxBounds, allBoxes))
+        {
+            if (!TryGetNearestCellClearOfNonStackableBoxes(
+                snappedPosition, boxBounds, mapBounds, allBoxes, out Vector3 clearPosition))
+            {
+                return;
+            }
+
+            snappedPosition.x = clearPosition.x;
+            snappedPosition.z = clearPosition.z;
+        }
+
         float bottomOffset = boxBounds.min.y - transform.position.y;
         float supportSurfaceY = GetEditorSupportSurfaceHeight(
-            snappedPosition, boxBounds, boxBounds.min.y, mapBounds.max.y);
+            snappedPosition, boxBounds, boxBounds.min.y, mapBounds.max.y, allBoxes);
         snappedPosition.y = supportSurfaceY - bottomOffset;
 
         if ((transform.position - snappedPosition).sqrMagnitude > 0.000001f)
@@ -94,8 +116,75 @@ public class GridBoxSnapToGrid : MonoBehaviour
         }
     }
 
+    private bool OverlapsNonStackableBox(
+        Vector3 cellCenter, Bounds movingBounds, BoxCollider[] allBoxes)
+    {
+        for (int i = 0; i < allBoxes.Length; i++)
+        {
+            BoxCollider candidateCollider = allBoxes[i];
+            GridBoxSnapToGrid candidate = candidateCollider != null
+                ? candidateCollider.GetComponent<GridBoxSnapToGrid>() : null;
+            if (candidate == null || candidate == this || candidate.CanBeStackedOn
+                || !candidateCollider.enabled)
+            {
+                continue;
+            }
+
+            Bounds candidateBounds = GetWorldBounds(candidateCollider);
+            bool overlapsX = Mathf.Min(cellCenter.x + movingBounds.extents.x, candidateBounds.max.x)
+                - Mathf.Max(cellCenter.x - movingBounds.extents.x, candidateBounds.min.x) > 0.01f;
+            bool overlapsZ = Mathf.Min(cellCenter.z + movingBounds.extents.z, candidateBounds.max.z)
+                - Mathf.Max(cellCenter.z - movingBounds.extents.z, candidateBounds.min.z) > 0.01f;
+            if (overlapsX && overlapsZ)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool TryGetNearestCellClearOfNonStackableBoxes(
+        Vector3 desiredPosition, Bounds movingBounds, Bounds mapBounds,
+        BoxCollider[] allBoxes, out Vector3 clearPosition)
+    {
+        clearPosition = desiredPosition;
+        int mapCellsX = Mathf.Max(1, Mathf.RoundToInt(mapBounds.size.x / cellSize));
+        int mapCellsZ = Mathf.Max(1, Mathf.RoundToInt(mapBounds.size.z / cellSize));
+        int boxCellsX = Mathf.Max(1, Mathf.RoundToInt(movingBounds.size.x / cellSize));
+        int boxCellsZ = Mathf.Max(1, Mathf.RoundToInt(movingBounds.size.z / cellSize));
+        float bestDistance = float.PositiveInfinity;
+        bool foundClearCell = false;
+
+        for (int x = 0; x <= mapCellsX - boxCellsX; x++)
+        {
+            for (int z = 0; z <= mapCellsZ - boxCellsZ; z++)
+            {
+                Vector3 candidate = new Vector3(
+                    mapBounds.min.x + (x + boxCellsX * 0.5f) * cellSize,
+                    desiredPosition.y,
+                    mapBounds.min.z + (z + boxCellsZ * 0.5f) * cellSize);
+                if (OverlapsNonStackableBox(candidate, movingBounds, allBoxes))
+                {
+                    continue;
+                }
+
+                float distance = (candidate - desiredPosition).sqrMagnitude;
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    clearPosition = candidate;
+                    foundClearCell = true;
+                }
+            }
+        }
+
+        return foundClearCell;
+    }
+
     private float GetEditorSupportSurfaceHeight(
-        Vector3 snappedPosition, Bounds movingBounds, float desiredBottomY, float mapSurfaceY)
+        Vector3 snappedPosition, Bounds movingBounds, float desiredBottomY, float mapSurfaceY,
+        BoxCollider[] allBoxes)
     {
         float supportSurfaceY = mapSurfaceY;
         if (desiredBottomY <= mapSurfaceY + 0.01f)
@@ -104,13 +193,18 @@ public class GridBoxSnapToGrid : MonoBehaviour
         }
 
         BoxCollider mapCollider = mapGrid != null ? mapGrid.GetComponent<BoxCollider>() : null;
-        BoxCollider[] allBoxes = FindObjectsOfType<BoxCollider>();
         for (int i = 0; i < allBoxes.Length; i++)
         {
             BoxCollider candidate = allBoxes[i];
             if (candidate == null || !candidate.enabled || candidate == boxCollider
                 || candidate == mapCollider || candidate.GetComponent<GridBoxSnapToGrid>() == null
                 || candidate.GetComponentInParent<TopDownCharacterController>() != null)
+            {
+                continue;
+            }
+
+            GridBoxSnapToGrid candidateGridBox = candidate.GetComponent<GridBoxSnapToGrid>();
+            if (candidateGridBox != null && !candidateGridBox.CanBeStackedOn)
             {
                 continue;
             }
@@ -427,6 +521,12 @@ public class GridBoxSnapToGrid : MonoBehaviour
                 continue;
             }
 
+            GridBoxSnapToGrid candidateGridBox = candidate.GetComponent<GridBoxSnapToGrid>();
+            if (candidateGridBox != null && !candidateGridBox.CanBeStackedOn)
+            {
+                continue;
+            }
+
             Bounds candidateBounds = candidate == baseBox
                 ? baseBounds
                 : candidate.bounds;
@@ -571,7 +671,7 @@ public class GridBoxSnapToGrid : MonoBehaviour
 
     public void CheckForMatchingStack()
     {
-        if (matchResolutionStarted || boxCollider == null)
+        if (!participatesInMatchMechanic || matchResolutionStarted || boxCollider == null)
         {
             return;
         }
@@ -647,7 +747,8 @@ public class GridBoxSnapToGrid : MonoBehaviour
 
     private static bool IsMatchingAdjacent(GridBoxSnapToGrid lower, GridBoxSnapToGrid upper, Color expectedColor)
     {
-        if (lower == null || upper == null || lower.boxCollider == null || upper.boxCollider == null)
+        if (lower == null || upper == null || lower.boxCollider == null || upper.boxCollider == null
+            || !lower.participatesInMatchMechanic || !upper.participatesInMatchMechanic)
         {
             return false;
         }

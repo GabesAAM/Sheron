@@ -24,7 +24,15 @@ public class SampleSceneUI : MonoBehaviour
 
     private void Awake()
     {
-        remainingBoxCount = FindObjectsOfType<GridBoxSnapToGrid>().Length;
+        GridBoxSnapToGrid[] gridBoxes = FindObjectsOfType<GridBoxSnapToGrid>();
+        remainingBoxCount = 0;
+        for (int i = 0; i < gridBoxes.Length; i++)
+        {
+            if (gridBoxes[i] != null && gridBoxes[i].ParticipatesInMatchMechanic)
+            {
+                remainingBoxCount++;
+            }
+        }
         GridBoxSnapToGrid.MatchedBoxesRemoved += OnMatchedBoxesRemoved;
         CreateClockUi();
         UpdateClockDisplay();

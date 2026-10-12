@@ -106,6 +106,11 @@ public class PlayerBoxInteraction : MonoBehaviour
         }
 
         GridBoxSnapToGrid gridSnap = target.GetComponent<GridBoxSnapToGrid>();
+        if (gridSnap != null && !gridSnap.CanBePickedUp)
+        {
+            return;
+        }
+
         BoxCollider clickedBox = target.GetComponent<BoxCollider>();
         if (gridSnap != null && clickedBox != null)
         {
@@ -122,6 +127,12 @@ public class PlayerBoxInteraction : MonoBehaviour
     public void ThrowHeldOn(ClickHighlightTarget target)
     {
         if (target == null || target == heldTarget || heldBody == null || movement == null)
+        {
+            return;
+        }
+
+        GridBoxSnapToGrid targetGrid = target.GetComponent<GridBoxSnapToGrid>();
+        if (targetGrid != null && !targetGrid.CanBeStackedOn)
         {
             return;
         }
