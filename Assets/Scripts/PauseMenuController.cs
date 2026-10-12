@@ -11,21 +11,34 @@ public sealed class PauseMenuController : MonoBehaviour
     private GameObject menuOverlay;
     private bool isPaused;
     private float previousTimeScale = 1f;
+    private static bool completionLocked;
 
     public static bool IsPaused { get; private set; }
 
     private void Awake()
     {
-        IsPaused = false;
+        IsPaused = completionLocked;
+        completionLocked = false;
         CreateMenu();
     }
 
     private void Update()
     {
+        if (IsPaused && !isPaused)
+        {
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             SetPaused(!isPaused);
         }
+    }
+
+    public static void LockGameplayForCompletion()
+    {
+        completionLocked = true;
+        IsPaused = true;
     }
 
     private void OnDestroy()

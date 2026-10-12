@@ -35,7 +35,10 @@ public class WorldMapController : MonoBehaviour
             return;
         }
 
-        targetStageIndex = Mathf.Clamp(PlayerPrefs.GetInt("WorldMap.SelectedStage", 0), 0, stages.Length - 1);
+        PlayerProgressSave.Load();
+        RefreshStageLockVisuals();
+        targetStageIndex = Mathf.Clamp(PlayerPrefs.GetInt("WorldMap.SelectedStage", 0),
+            0, GetLastUnlockedStageIndex());
         routeProgress = targetStageIndex;
         RefreshPathPositions();
         CreateInterface();
@@ -48,8 +51,12 @@ public class WorldMapController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.D)
             || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.RightArrow))
         {
-            targetStageIndex = Mathf.Min(stages.Length - 1, targetStageIndex + 1);
-            UpdateStageInterface();
+            int nextStageIndex = Mathf.Min(stages.Length - 1, targetStageIndex + 1);
+            if (IsStageIndexUnlocked(nextStageIndex))
+            {
+                targetStageIndex = nextStageIndex;
+                UpdateStageInterface();
+            }
         }
         else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.A)
             || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.LeftArrow))
@@ -125,10 +132,10 @@ public class WorldMapController : MonoBehaviour
         header.fontStyle = FontStyle.Bold;
 
         Text controls = CreateText(canvas.transform, "World Map Controls",
-            "W / D or Right Arrow: next     A / S or Left Arrow: previous", 20,
+            "W / D or Right Arrow: next     A / S or Left Arrow: previous     Finish stages to unlock the next", 16,
             TextAnchor.MiddleCenter, new Color(1f, 1f, 1f, 0.92f));
         SetRect(controls.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-            new Vector2(0f, -92f), new Vector2(760f, 38f));
+            new Vector2(0f, -92f), new Vector2(1050f, 38f));
 
         stageOptionsPanel = new GameObject("Stage Options Panel", typeof(RectTransform), typeof(Image));
         stageOptionsPanel.transform.SetParent(canvas.transform, false);
@@ -205,9 +212,37 @@ public class WorldMapController : MonoBehaviour
         }
     }
 
+    private void RefreshStageLockVisuals()
+    {
+        for (int i = 0; i < stages.Length; i++)
+        {
+            stages[i].SetLocked(!PlayerProgressSave.IsStageUnlocked(stages[i].StageNumber));
+        }
+    }
+
     private bool IsAtStage(int stageIndex)
     {
         return Mathf.Abs(routeProgress - stageIndex) < 0.001f;
+    }
+
+    private bool IsStageIndexUnlocked(int stageIndex)
+    {
+        return stageIndex >= 0 && stageIndex < stages.Length
+            && PlayerProgressSave.IsStageUnlocked(stages[stageIndex].StageNumber);
+    }
+
+    private int GetLastUnlockedStageIndex()
+    {
+        int lastUnlockedIndex = -1;
+        for (int i = 0; i < stages.Length; i++)
+        {
+            if (IsStageIndexUnlocked(i))
+            {
+                lastUnlockedIndex = i;
+            }
+        }
+
+        return lastUnlockedIndex >= 0 ? lastUnlockedIndex : 0;
     }
 
     private void StartSelectedStage()
@@ -218,6 +253,11 @@ public class WorldMapController : MonoBehaviour
         }
 
         WorldMapStageNode selectedStage = stages[targetStageIndex];
+        if (!PlayerProgressSave.IsStageUnlocked(selectedStage.StageNumber))
+        {
+            return;
+        }
+
         if (string.IsNullOrEmpty(selectedStage.ScenePath))
         {
             Debug.LogError("Assign a Scene Asset to this stage in the World Map Inspector.", selectedStage);
@@ -231,6 +271,7 @@ public class WorldMapController : MonoBehaviour
         }
 
         PlayerPrefs.SetInt("WorldMap.SelectedStage", targetStageIndex);
+        PlayerPrefs.SetInt("WorldMap.SelectedStageNumber", selectedStage.StageNumber);
         PlayerPrefs.Save();
         SceneTransition.LoadScene(selectedStage.ScenePath);
     }

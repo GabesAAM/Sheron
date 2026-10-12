@@ -18,6 +18,7 @@ public sealed class PlayerHealth : MonoBehaviour
     private bool[] originalSpriteStates;
     private int currentHealth;
     private float invulnerableUntil;
+    private bool isInvincible;
     private Coroutine blinkRoutine;
 
     public event Action<int, int> HealthChanged;
@@ -42,7 +43,7 @@ public sealed class PlayerHealth : MonoBehaviour
 
     public bool TakeDamage()
     {
-        if (currentHealth <= 0 || Time.time < invulnerableUntil)
+        if (currentHealth <= 0 || isInvincible || Time.time < invulnerableUntil)
         {
             return false;
         }
@@ -77,6 +78,17 @@ public sealed class PlayerHealth : MonoBehaviour
         }
 
         return true;
+    }
+
+    public void SetInvincible(bool invincible)
+    {
+        isInvincible = invincible;
+        if (invincible && blinkRoutine != null)
+        {
+            StopCoroutine(blinkRoutine);
+            blinkRoutine = null;
+            RestoreOriginalSpriteStates();
+        }
     }
 
     private IEnumerator BlinkAfterDamage()

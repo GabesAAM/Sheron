@@ -22,6 +22,17 @@ public class WorldMapStageNode : MonoBehaviour
     public SpriteRenderer IconRenderer { get { return iconRenderer; } }
     public Transform SelectionRing { get { return selectionRing; } }
 
+    private Renderer markerRenderer;
+    private Renderer platformRenderer;
+    private MaterialPropertyBlock lockedMaterialProperties;
+    private Color originalIconColor = Color.white;
+    private Color originalNumberColor = Color.white;
+    private Color originalMarkerColor = Color.white;
+    private Color originalPlatformColor = Color.white;
+    private bool lockedVisualsCached;
+
+    private static readonly int ColorProperty = Shader.PropertyToID("_Color");
+
     public void Configure(int number, string title, Transform ring, SpriteRenderer icon, TextMesh label)
     {
         stageNumber = number;
@@ -46,6 +57,87 @@ public class WorldMapStageNode : MonoBehaviour
         {
             selectionRing.gameObject.SetActive(selected);
         }
+    }
+
+    public void SetLocked(bool locked)
+    {
+        CacheLockedVisuals();
+
+        if (iconRenderer != null)
+        {
+            iconRenderer.color = locked
+                ? Color.Lerp(originalIconColor, Color.gray, 0.72f)
+                : originalIconColor;
+        }
+
+        if (numberLabel != null)
+        {
+            numberLabel.color = locked
+                ? Color.Lerp(originalNumberColor, Color.gray, 0.72f)
+                : originalNumberColor;
+        }
+
+        ApplyLockedTint(markerRenderer, originalMarkerColor, locked);
+        ApplyLockedTint(platformRenderer, originalPlatformColor, locked);
+    }
+
+    private void CacheLockedVisuals()
+    {
+        if (lockedVisualsCached)
+        {
+            return;
+        }
+
+        if (iconRenderer != null)
+        {
+            originalIconColor = iconRenderer.color;
+        }
+        if (numberLabel != null)
+        {
+            originalNumberColor = numberLabel.color;
+        }
+
+        Transform marker = transform.Find("Marker");
+        if (marker != null)
+        {
+            markerRenderer = marker.GetComponent<Renderer>();
+        }
+        Transform platform = transform.Find("Platform");
+        if (platform != null)
+        {
+            platformRenderer = platform.GetComponent<Renderer>();
+        }
+        if (markerRenderer != null && markerRenderer.sharedMaterial != null
+            && markerRenderer.sharedMaterial.HasProperty(ColorProperty))
+        {
+            originalMarkerColor = markerRenderer.sharedMaterial.GetColor(ColorProperty);
+        }
+        if (platformRenderer != null && platformRenderer.sharedMaterial != null
+            && platformRenderer.sharedMaterial.HasProperty(ColorProperty))
+        {
+            originalPlatformColor = platformRenderer.sharedMaterial.GetColor(ColorProperty);
+        }
+
+        lockedVisualsCached = true;
+    }
+
+    private void ApplyLockedTint(Renderer targetRenderer, Color originalColor, bool locked)
+    {
+        if (targetRenderer == null || targetRenderer.sharedMaterial == null
+            || !targetRenderer.sharedMaterial.HasProperty(ColorProperty))
+        {
+            return;
+        }
+
+        if (lockedMaterialProperties == null)
+        {
+            lockedMaterialProperties = new MaterialPropertyBlock();
+        }
+
+        targetRenderer.GetPropertyBlock(lockedMaterialProperties);
+        Color tint = locked ? Color.Lerp(originalColor, Color.gray, 0.72f) : originalColor;
+        lockedMaterialProperties.SetColor(ColorProperty, tint);
+        targetRenderer.SetPropertyBlock(lockedMaterialProperties);
     }
 
     public void FaceCamera(Camera targetCamera)

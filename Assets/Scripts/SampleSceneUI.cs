@@ -1,9 +1,13 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public class SampleSceneUI : MonoBehaviour
 {
+    private const string WorldMapScenePath = "Assets/Scenes/WorldMap.unity";
+    private const int StagesPerWorld = 5;
+
     [SerializeField] private Vector2 screenMargin = new Vector2(28f, 28f);
     [SerializeField] private Vector2 panelSize = new Vector2(230f, 128f);
     [SerializeField, Min(12)] private int timerFontSize = 34;
@@ -14,11 +18,14 @@ public class SampleSceneUI : MonoBehaviour
     private Text timerText;
     private Text boxCountText;
     private Text healthHeartsText;
+    private Text completionLevelText;
+    private Text completionTimeText;
     private GameObject congratulationsOverlay;
     private PlayerHealth playerHealth;
     private float elapsedTime;
     private int lastDisplayedSecond = -1;
     private bool timerRunning = true;
+    private bool completionRecorded;
 
     public int RemainingBoxCount { get { return remainingBoxCount; } }
 
@@ -35,6 +42,7 @@ public class SampleSceneUI : MonoBehaviour
         }
         GridBoxSnapToGrid.MatchedBoxesRemoved += OnMatchedBoxesRemoved;
         CreateClockUi();
+        playerHealth = FindObjectOfType<PlayerHealth>();
         UpdateClockDisplay();
         UpdateBoxCountDisplay();
 
@@ -61,7 +69,6 @@ public class SampleSceneUI : MonoBehaviour
 
     private void Start()
     {
-        playerHealth = FindObjectOfType<PlayerHealth>();
         if (playerHealth != null)
         {
             playerHealth.HealthChanged += OnPlayerHealthChanged;
@@ -194,21 +201,40 @@ public class SampleSceneUI : MonoBehaviour
         messagePanelRect.anchorMax = new Vector2(0.5f, 0.5f);
         messagePanelRect.pivot = new Vector2(0.5f, 0.5f);
         messagePanelRect.anchoredPosition = Vector2.zero;
-        messagePanelRect.sizeDelta = new Vector2(620f, 180f);
+        messagePanelRect.sizeDelta = new Vector2(620f, 300f);
 
         Image messagePanelImage = messagePanel.GetComponent<Image>();
         messagePanelImage.color = new Color(0.035f, 0.055f, 0.09f, 0.96f);
         messagePanelImage.raycastTarget = false;
 
+        completionLevelText = CreateLabel(messagePanel.transform, "Completed Level",
+            "WORLD 1-1", 28, FontStyle.Bold, new Color(0.53f, 0.82f, 1f));
+        SetOverlayLabelRect(completionLevelText, new Vector2(0f, 96f), new Vector2(560f, 44f));
+
         Text message = CreateLabel(messagePanel.transform, "Congratulations Message",
             "Congratulations!", 44, FontStyle.Bold, Color.white);
-        RectTransform messageRect = message.rectTransform;
-        messageRect.anchorMin = Vector2.zero;
-        messageRect.anchorMax = Vector2.one;
-        messageRect.offsetMin = new Vector2(16f, 12f);
-        messageRect.offsetMax = new Vector2(-16f, -12f);
+        SetOverlayLabelRect(message, new Vector2(0f, 38f), new Vector2(580f, 64f));
+
+        completionTimeText = CreateLabel(messagePanel.transform, "Completion Time",
+            "TIME: 00:00", 28, FontStyle.Bold, Color.white);
+        SetOverlayLabelRect(completionTimeText, new Vector2(0f, -30f), new Vector2(560f, 44f));
+
+        Text returnMessage = CreateLabel(messagePanel.transform, "Return To World Map Message",
+            "Returning to the World Map...", 18, FontStyle.Normal,
+            new Color(0.78f, 0.82f, 0.88f));
+        SetOverlayLabelRect(returnMessage, new Vector2(0f, -103f), new Vector2(560f, 34f));
 
         congratulationsOverlay.SetActive(false);
+    }
+
+    private static void SetOverlayLabelRect(Text label, Vector2 position, Vector2 size)
+    {
+        RectTransform rect = label.rectTransform;
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = position;
+        rect.sizeDelta = size;
     }
 
     private static Text CreateLabel(Transform parent, string objectName, string content,
@@ -286,10 +312,54 @@ public class SampleSceneUI : MonoBehaviour
 
     private void ShowCongratulations()
     {
+        if (completionRecorded)
+        {
+            return;
+        }
+
+        completionRecorded = true;
         timerRunning = false;
+        UpdateClockDisplay();
+
+        int completedStageNumber = PlayerPrefs.GetInt("WorldMap.SelectedStageNumber",
+            PlayerPrefs.GetInt("WorldMap.SelectedStage", 0) + 1);
+        int zeroBasedStage = Mathf.Max(1, completedStageNumber) - 1;
+        int worldNumber = zeroBasedStage / StagesPerWorld + 1;
+        int levelNumber = zeroBasedStage % StagesPerWorld + 1;
+        if (completionLevelText != null)
+        {
+            completionLevelText.text = "WORLD " + worldNumber + "-" + levelNumber;
+        }
+        if (completionTimeText != null && timerText != null)
+        {
+            completionTimeText.text = "TIME: " + timerText.text;
+        }
+
+        if (playerHealth == null)
+        {
+            playerHealth = FindObjectOfType<PlayerHealth>();
+        }
+        if (playerHealth != null)
+        {
+            playerHealth.SetInvincible(true);
+        }
+
+        PlayerProgressSave.CompleteStage(completedStageNumber, 0, elapsedTime);
+        PauseMenuController.LockGameplayForCompletion();
+        Time.timeScale = 0f;
+
         if (congratulationsOverlay != null)
         {
             congratulationsOverlay.SetActive(true);
         }
+
+        StartCoroutine(ReturnToWorldMapAfterDelay());
+    }
+
+    private IEnumerator ReturnToWorldMapAfterDelay()
+    {
+        yield return new WaitForSecondsRealtime(3f);
+        Time.timeScale = 1f;
+        SceneTransition.LoadScene(WorldMapScenePath);
     }
 }
