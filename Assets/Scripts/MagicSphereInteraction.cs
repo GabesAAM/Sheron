@@ -118,6 +118,14 @@ public sealed class MagicSphereInteraction : MonoBehaviour
         CancelCurrentCommand();
     }
 
+    public void DropHeldObjectForDamage()
+    {
+        if (heldSphere != null)
+        {
+            DropHeldSphereInFront();
+        }
+    }
+
     public void CancelForOtherInteraction()
     {
         CancelCurrentCommand();

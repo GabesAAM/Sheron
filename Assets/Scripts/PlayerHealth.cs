@@ -14,14 +14,15 @@ public sealed class PlayerHealth : MonoBehaviour
     private TopDownCharacterController movement;
     private PlayerBoxInteraction boxInteraction;
     private MagicSphereInteraction magicSphereInteraction;
-    private SpriteRenderer[] spriteRenderers;
-    private bool[] originalSpriteStates;
+    private Renderer[] playerRenderers;
+    private bool[] originalRendererStates;
     private int currentHealth;
     private float invulnerableUntil;
     private bool isInvincible;
     private Coroutine blinkRoutine;
 
     public event Action<int, int> HealthChanged;
+    public event Action DamageTaken;
 
     public int CurrentHealth { get { return currentHealth; } }
     public int MaxHealth { get { return maxHealth; } }
@@ -33,11 +34,11 @@ public sealed class PlayerHealth : MonoBehaviour
         movement = GetComponent<TopDownCharacterController>();
         boxInteraction = GetComponent<PlayerBoxInteraction>();
         magicSphereInteraction = GetComponent<MagicSphereInteraction>();
-        spriteRenderers = GetComponentsInChildren<SpriteRenderer>(true);
-        originalSpriteStates = new bool[spriteRenderers.Length];
-        for (int i = 0; i < spriteRenderers.Length; i++)
+        playerRenderers = GetComponentsInChildren<Renderer>(true);
+        originalRendererStates = new bool[playerRenderers.Length];
+        for (int i = 0; i < playerRenderers.Length; i++)
         {
-            originalSpriteStates[i] = spriteRenderers[i].enabled;
+            originalRendererStates[i] = playerRenderers[i].enabled;
         }
     }
 
@@ -61,6 +62,16 @@ public sealed class PlayerHealth : MonoBehaviour
             magicSphereInteraction.CancelForDamage();
         }
 
+        if (boxInteraction != null)
+        {
+            boxInteraction.DropHeldObjectForDamage();
+        }
+
+        if (magicSphereInteraction != null)
+        {
+            magicSphereInteraction.DropHeldObjectForDamage();
+        }
+
         if (movement != null)
         {
             movement.ApplyKnockback(-movement.FacingDirection, knockbackDistance, knockbackDuration);
@@ -76,6 +87,10 @@ public sealed class PlayerHealth : MonoBehaviour
         {
             HealthChanged(currentHealth, maxHealth);
         }
+        if (DamageTaken != null)
+        {
+            DamageTaken();
+        }
 
         return true;
     }
@@ -87,7 +102,7 @@ public sealed class PlayerHealth : MonoBehaviour
         {
             StopCoroutine(blinkRoutine);
             blinkRoutine = null;
-            RestoreOriginalSpriteStates();
+            RestoreOriginalRendererStates();
         }
     }
 
@@ -95,13 +110,13 @@ public sealed class PlayerHealth : MonoBehaviour
     {
         for (int blink = 0; blink < blinkCount; blink++)
         {
-            SetSpritesVisible(false);
+            SetPlayerRenderersVisible(false);
             yield return new WaitForSeconds(blinkHalfPeriod);
-            SetSpritesVisible(true);
+            SetPlayerRenderersVisible(true);
             yield return new WaitForSeconds(blinkHalfPeriod);
         }
 
-        RestoreOriginalSpriteStates();
+        RestoreOriginalRendererStates();
         blinkRoutine = null;
     }
 
@@ -112,32 +127,32 @@ public sealed class PlayerHealth : MonoBehaviour
             StopCoroutine(blinkRoutine);
             blinkRoutine = null;
         }
-        RestoreOriginalSpriteStates();
+        RestoreOriginalRendererStates();
     }
 
-    private void SetSpritesVisible(bool visible)
+    private void SetPlayerRenderersVisible(bool visible)
     {
-        for (int i = 0; i < spriteRenderers.Length; i++)
+        for (int i = 0; i < playerRenderers.Length; i++)
         {
-            if (spriteRenderers[i] != null)
+            if (playerRenderers[i] != null)
             {
-                spriteRenderers[i].enabled = visible && originalSpriteStates[i];
+                playerRenderers[i].enabled = visible && originalRendererStates[i];
             }
         }
     }
 
-    private void RestoreOriginalSpriteStates()
+    private void RestoreOriginalRendererStates()
     {
-        if (spriteRenderers == null || originalSpriteStates == null)
+        if (playerRenderers == null || originalRendererStates == null)
         {
             return;
         }
 
-        for (int i = 0; i < spriteRenderers.Length; i++)
+        for (int i = 0; i < playerRenderers.Length; i++)
         {
-            if (spriteRenderers[i] != null)
+            if (playerRenderers[i] != null)
             {
-                spriteRenderers[i].enabled = originalSpriteStates[i];
+                playerRenderers[i].enabled = originalRendererStates[i];
             }
         }
     }

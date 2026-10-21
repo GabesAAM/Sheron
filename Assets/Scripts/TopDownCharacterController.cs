@@ -24,6 +24,8 @@ public class TopDownCharacterController : MonoBehaviour
         get { return facingDirection; }
     }
 
+    public bool IsMoving { get; private set; }
+
     private void Awake()
     {
         body = GetComponent<Rigidbody>();
@@ -140,6 +142,8 @@ public class TopDownCharacterController : MonoBehaviour
             targetPosition.x = Mathf.Clamp(targetPosition.x, bounds.min.x + xPadding, bounds.max.x - xPadding);
             targetPosition.z = Mathf.Clamp(targetPosition.z, bounds.min.z + zPadding, bounds.max.z - zPadding);
         }
+
+        IsMoving = (targetPosition - body.position).sqrMagnitude > 0.0001f;
 
         body.MovePosition(targetPosition);
 

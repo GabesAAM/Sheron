@@ -98,6 +98,14 @@ public class PlayerBoxInteraction : MonoBehaviour
         CancelCurrentCommand();
     }
 
+    public void DropHeldObjectForDamage()
+    {
+        if (heldBody != null)
+        {
+            DropHeldInFront();
+        }
+    }
+
     public void CancelForOtherInteraction()
     {
         CancelCurrentCommand();
