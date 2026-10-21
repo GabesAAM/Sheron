@@ -436,6 +436,10 @@ PrefabInstance:
     - target: {fileID: 7004763836780984062, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
       propertyPath: sceneAsset
       value: 
+      objectReference: {fileID: 102900000, guid: 1a29ef1139bee844eb0b214fe5e13b32, type: 3}
+    - target: {fileID: 7004763836780984062, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
+      propertyPath: scenePath
+      value: Assets/Scenes/Grass World/Grass1_2.unity
       objectReference: {fileID: 0}
     - target: {fileID: 7200291940679877330, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
       propertyPath: m_Name
@@ -702,6 +706,14 @@ PrefabInstance:
       propertyPath: displayName
       value: Green Hills
       objectReference: {fileID: 0}
+    - target: {fileID: 7004763836780984062, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
+      propertyPath: scenePath
+      value: Assets/Scenes/Grass World/Grass1_1.unity
+      objectReference: {fileID: 0}
+    - target: {fileID: 7004763836780984062, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
+      propertyPath: sceneAsset
+      value: 
+      objectReference: {fileID: 102900000, guid: c734d0e9b8a77bf44a238ccd29fd1d72, type: 3}
     - target: {fileID: 7200291940679877330, guid: 5ad4234c3a2b4334daad9e8eff30f964, type: 3}
       propertyPath: m_Name
       value: Stage 1 - Green Hills

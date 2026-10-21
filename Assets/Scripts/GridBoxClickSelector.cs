@@ -96,6 +96,18 @@ public class GridBoxClickSelector : MonoBehaviour
             return;
         }
 
+        // The sphere is a single-click interaction. Boxes keep their existing
+        // double-click pickup behavior below.
+        MagicSphere clickedSphere = clickedTarget != null
+            ? clickedTarget.GetComponentInParent<MagicSphere>()
+            : null;
+        if (clickedSphere != null && magicSphereInteraction != null)
+        {
+            magicSphereInteraction.PickUp(clickedSphere);
+            ResetClickSequence();
+            return;
+        }
+
         bool isDoubleClick = clickedTarget != null
             && clickedTarget == lastClickedTarget
             && Time.unscaledTime - lastClickTime <= doubleClickInterval;
@@ -104,12 +116,7 @@ public class GridBoxClickSelector : MonoBehaviour
         {
             lastClickedTarget = null;
             lastClickTime = -1f;
-            MagicSphere sphere = clickedTarget.GetComponentInParent<MagicSphere>();
-            if (sphere != null && magicSphereInteraction != null)
-            {
-                magicSphereInteraction.PickUp(sphere);
-            }
-            else if (clickedTarget.GetComponent<GridBoxSnapToGrid>() != null)
+            if (clickedTarget.GetComponent<GridBoxSnapToGrid>() != null)
             {
                 playerInteraction.PickUp(clickedTarget);
             }

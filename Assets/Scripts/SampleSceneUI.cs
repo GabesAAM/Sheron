@@ -360,6 +360,7 @@ public class SampleSceneUI : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(3f);
         Time.timeScale = 1f;
+        PauseMenuController.ClearCompletionLockForSceneTransition();
         SceneTransition.LoadScene(WorldMapScenePath);
     }
 }

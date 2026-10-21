@@ -41,6 +41,12 @@ public sealed class PauseMenuController : MonoBehaviour
         IsPaused = true;
     }
 
+    public static void ClearCompletionLockForSceneTransition()
+    {
+        completionLocked = false;
+        IsPaused = false;
+    }
+
     private void OnDestroy()
     {
         if (isPaused)
