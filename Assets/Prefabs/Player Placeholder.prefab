@@ -139,8 +139,8 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 112
   m_CollisionDetection: 1
---- !u!136 &1429818237911520653
-CapsuleCollider:
+--- !u!65 &1429818237911520653
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -149,9 +149,8 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.3
-  m_Height: 1.2
-  m_Direction: 1
+  serializedVersion: 2
+  m_Size: {x: 2, y: 2, z: 2}
   m_Center: {x: 0, y: 0.6, z: 0}
 --- !u!114 &1429818237911520650
 MonoBehaviour:
@@ -281,7 +280,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1429818237911520666}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.05, z: 0.7}
+  m_LocalPosition: {x: 0, y: 2.5, z: 0.65}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1429818237911520655}
@@ -315,8 +314,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5040217232166539742}
   m_LocalRotation: {x: -0, y: 0.9659259, z: 0.258819, w: 0}
-  m_LocalPosition: {x: 0, y: 0.9, z: 0.15}
-  m_LocalScale: {x: 0.35000002, y: 0.35, z: 0}
+  m_LocalPosition: {x: 0.15, y: 0.7, z: 0}
+  m_LocalScale: {x: 0.65, y: 0.44, z: 0}
   m_Children: []
   m_Father: {fileID: 1429818237911520655}
   m_RootOrder: 2

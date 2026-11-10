@@ -70,7 +70,7 @@ public sealed class MagicSphere : MonoBehaviour
         body.useGravity = false;
         body.isKinematic = true;
         sphereCollider.enabled = false;
-        transform.SetParent(carryAnchor, false);
+        transform.SetParent(carryAnchor, true);
         transform.localPosition = Vector3.zero;
         transform.localRotation = Quaternion.identity;
     }

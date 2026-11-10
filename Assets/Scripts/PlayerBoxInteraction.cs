@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerBoxInteraction : MonoBehaviour
@@ -262,7 +261,7 @@ public class PlayerBoxInteraction : MonoBehaviour
         heldBody.collisionDetectionMode = CollisionDetectionMode.Discrete;
         heldBody.interpolation = RigidbodyInterpolation.None;
         heldCollider.enabled = false;
-        heldBody.transform.SetParent(carryAnchor, false);
+        heldBody.transform.SetParent(carryAnchor, true);
         heldBody.transform.localPosition = Vector3.zero;
         heldBody.transform.localRotation = Quaternion.identity;
     }
@@ -441,7 +440,6 @@ public class PlayerBoxInteraction : MonoBehaviour
         boxTransform.SetParent(null, true);
         boxTransform.position = launchPosition;
         boxTransform.rotation = Quaternion.identity;
-        heldCollider.enabled = true;
         heldBody.useGravity = true;
         heldBody.collisionDetectionMode = CollisionDetectionMode.Discrete;
         heldBody.interpolation = RigidbodyInterpolation.Interpolate;
@@ -494,11 +492,8 @@ public class PlayerBoxInteraction : MonoBehaviour
         thrownBody.velocity = (landingPosition - launchPosition
             - 0.5f * Physics.gravity * flightTime * flightTime) / flightTime;
 
-        List<Collider> ignoredStackColliders = IgnoreTargetColumnCollisions(thrownBox, targetCollider);
-
         StartCoroutine(StopBoxAtTargetTop(
-            thrownBody, thrownBox, targetCollider, thrownGrid, targetGrid, flightTime, landingPosition, stackTop,
-            ignoredStackColliders));
+            thrownBody, thrownBox, targetCollider, thrownGrid, targetGrid, flightTime, landingPosition, stackTop));
 
         heldBody = null;
         heldCollider = null;
@@ -513,8 +508,7 @@ public class PlayerBoxInteraction : MonoBehaviour
         GridBoxSnapToGrid targetGrid,
         float flightTime,
         Vector3 landingPosition,
-        float stackTop,
-        List<Collider> ignoredStackColliders)
+        float stackTop)
     {
         yield return new WaitForSeconds(flightTime);
         if (thrownBody == null || thrownBox == null)
@@ -548,9 +542,8 @@ public class PlayerBoxInteraction : MonoBehaviour
         thrownBody.angularVelocity = Vector3.zero;
         thrownBody.useGravity = false;
         thrownBody.isKinematic = true;
+        thrownBox.enabled = true;
         Physics.SyncTransforms();
-
-        RestoreTargetColumnCollisions(thrownBox, ignoredStackColliders);
 
         if (thrownGrid != null)
         {
@@ -559,59 +552,4 @@ public class PlayerBoxInteraction : MonoBehaviour
         }
     }
 
-    private static List<Collider> IgnoreTargetColumnCollisions(BoxCollider thrownBox, Collider targetCollider)
-    {
-        List<Collider> ignoredColliders = new List<Collider>();
-        if (thrownBox == null || targetCollider == null)
-        {
-            return ignoredColliders;
-        }
-
-        Bounds targetBounds = targetCollider.bounds;
-        GridBoxSnapToGrid[] boxes = FindObjectsOfType<GridBoxSnapToGrid>();
-        for (int i = 0; i < boxes.Length; i++)
-        {
-            GridBoxSnapToGrid gridBox = boxes[i];
-            if (gridBox == null || gridBox == thrownBox.GetComponent<GridBoxSnapToGrid>())
-            {
-                continue;
-            }
-
-            BoxCollider stackBox = gridBox.GetComponent<BoxCollider>();
-            if (stackBox == null || !stackBox.enabled)
-            {
-                continue;
-            }
-
-            Bounds stackBounds = GridBoxSnapToGrid.GetWorldBounds(stackBox);
-            bool sameColumn = Mathf.Abs(stackBounds.center.x - targetBounds.center.x) < 0.05f
-                && Mathf.Abs(stackBounds.center.z - targetBounds.center.z) < 0.05f;
-            if (!sameColumn)
-            {
-                continue;
-            }
-
-            Physics.IgnoreCollision(thrownBox, stackBox, true);
-            ignoredColliders.Add(stackBox);
-        }
-
-        return ignoredColliders;
-    }
-
-    private static void RestoreTargetColumnCollisions(BoxCollider thrownBox, List<Collider> ignoredColliders)
-    {
-        if (thrownBox == null || ignoredColliders == null)
-        {
-            return;
-        }
-
-        for (int i = 0; i < ignoredColliders.Count; i++)
-        {
-            Collider ignoredCollider = ignoredColliders[i];
-            if (ignoredCollider != null)
-            {
-                Physics.IgnoreCollision(thrownBox, ignoredCollider, false);
-            }
-        }
-    }
 }
